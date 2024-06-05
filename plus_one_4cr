@@ -1,0 +1,83 @@
+import telebot
+import json
+from datetime import datetime
+
+# Загружаем списки тегов и ФИО из файлов
+with open('/Users/formalraindbow43/Downloads/Telegram Desktop/tags.txt', 'r', encoding="UTF-8") as file:
+    username_list = file.read().splitlines()
+
+with open("/Users/formalraindbow43/Downloads/Telegram Desktop/ФИО 4 курс.txt", 'r', encoding="UTF-8") as file:
+    names_list = file.read().splitlines()
+
+# Загрузка списка пользователей из JSON-файла
+with open("/Users/formalraindbow43/Downloads/Telegram Desktop/users.json", 'r', encoding='utf-8') as f:
+    users_dict = json.load(f)
+
+# Инициализация бота
+API_TOKEN = 'api'
+bot = telebot.TeleBot(API_TOKEN)
+
+
+
+# Обработчик команды /start
+@bot.message_handler(commands=['start'])
+def start_message(message):
+    bot.send_message(message.chat.id, 'Привет! Введи свои ФИО. Если отчества нет - введите прочерк("-")')
+
+# Обработчик текстовых сообщений
+@bot.message_handler(func=lambda message: True)
+def check_info(message):
+    # Получаем id и username пользователя
+    user_id = message.from_user.id
+    username = message.from_user.username
+
+    # Разделяем сообщение на ФИО
+    data = message.text.split()
+    if len(data) != 3:
+        bot.reply_to(message, 'Неверный формат ввода. Пожалуйста, введите ФИО через пробел (Фамилия Имя Отчество). Если отчества нет - введите прочерк("-")')
+        return
+
+    full_name = " ".join(data)
+
+    # Проверяем наличие ФИО в списке четверокурсников
+    if full_name in names_list:
+        if username in username_list:
+            info = {
+                f'@{username}': [data[0], data[1], data[2], "-", "-", "-", datetime.now().strftime("%Y-%m-%d %H:%M:%S")]
+            }
+
+            # Записываем данные в JSON файл
+            with open("C:/Users/Home/Desktop/Бот выпускной/data.json", 'w') as file:
+                json.dump(info, file, ensure_ascii=False, indent=4)
+
+            bot.reply_to(message, 'Данные успешно записаны в файл data.json.')
+        else:
+            bot.reply_to(message, 'Извини, твоего username нет в списке. Обратитесь в личные сообщения.')
+    else:
+        for inviter, invitee in users_dict.items():
+            if full_name in invitee: 
+                bot.reply_to(message, 'Ты уже в списке пришлашенных +1')
+                return
+        bot.reply_to(message, 'Твоих данных нет в списке четверокусников, хочешь купить билет +1? Введите ФИО друга:')
+        bot.register_next_step_handler(message, ask_friend_fio, message.text)
+
+def ask_friend_fio(message, user_data):
+    friend_fio = message.text
+    if friend_fio in names_list:
+        # Проверяем, приглашал ли уже кто-то этого друга
+        for inviter, invitee in users_dict.items():
+            if friend_fio == inviter:
+                bot.send_message(message.chat.id, 'Ваш друг уже приглаcил на мероприятие')
+                return
+
+        # Отправляем реквизиты для оплаты
+        bot.send_message(message.chat.id, 'Все ок. Вот реквизиты для оплаты')
+        users_dict[f'{friend_fio}'] = f'{user_data}'
+
+        with open("/Users/formalraindbow43/Downloads/Telegram Desktop/users.json", 'w', encoding='utf-8') as f:
+            json.dump(users_dict, f, ensure_ascii=False, indent=4)
+    else:
+        bot.send_message(message.chat.id, 'Нет такого друга в списке.')
+
+# Запускаем бота
+bot.polling(none_stop=True)
