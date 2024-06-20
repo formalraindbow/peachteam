@@ -3,23 +3,38 @@ from telebot import types
 import json
 from datetime import datetime
 import pytz
-API_TOKEN = ''
+API_TOKEN = '7337352069:AAEldMs_t8rPdIHHXV_b51UDQSAYoEJgqts'
 bot = telebot.TeleBot(API_TOKEN)
+
+# Загружаем списки тегов и ФИО из файлов
+with open('/home/romchikhamrin/telebot/tags.txt', 'r', encoding="UTF-8") as file:
+    username_list = file.read()
+
+with open("/home/romchikhamrin/telebot/ФИО 4 курс.txt", 'r', encoding="UTF-8") as file:
+    names_list = file.read()
+
+with open("/home/romchikhamrin/telebot/users.json", 'r', encoding='utf-8') as f:
+    users_dict = json.load(f)
+
+with open("/home/romchikhamrin/telebot/friend_kostel.json", 'r', encoding='utf-8') as f:
+    friends_dict = json.load(f)
 
 data={}
 university={}
 vip_client=False
 for_who = ""
 for_where = ""
+friend_fio = {}
 
-text_oplata = "Ты можешь приобрести билет на After Grade Party’24 по фикированой цене.\n\nЦена: *3500р*.\n\nПо такой цене продаются 30 первых билетов, далее цена повысится.\n\nВАЖНО: При покупке билета обязательно укажи *ФИО* в сообщении к переводу.\n\nТИНЬКОФФ:\n'''5536914028739823'''\n\nСБЕР:\n'''4279380695720963'''\n\nВТБ: '''2200246091065709'''\n\nПо номеру телефона:\n'''+7 (929) 657-46-27'''\nЕкатерина Александровка К.\n\n*ПОСЛЕ СОВЕРШЕНИЯ ОПЛАТЫ*\n\nПожалуйста, напиши свое *ФИО*\n\n_Пример: Иванов Иван Иваныч_\n\n_Если ты начал/а процесс регистрации, пожалуйста, пройди его до конца. Если после введения ФИО бот не дает  ответа - нажми заново /start_"
-rules_dict = ['/home/romanloqi/code/правила_1 (1).png', '/home/romanloqi/code/правила_2 (1).png']
-bar_dict= ['/home/romanloqi/code/photo_1.jpeg', '/home/romanloqi/code/photo_2.jpeg',
-            '/home/romanloqi/code/photo_3.jpeg','/home/romanloqi/code/photo_4.jpeg',
-            '/home/romanloqi/code/photo_5.jpeg', '/home/romanloqi/code/photo_6.jpeg',
-            '/home/romanloqi/code/photo_7.jpeg', '/home/romanloqi/code/photo_8.jpeg']
 
-loft = '/home/romanloqi/code/photo_loft.jpeg'
+text_oplata = "Ты можешь приобрести билет на After Grade Party’24 по фикированой цене.\n\nЦена: *4000р*.\n\nВАЖНО: При покупке билета обязательно укажи *ФИО* в сообщении к переводу.\n\nТИНЬКОФФ:\n'''5536914028739823'''\n\nСБЕР:\n'''4279380695720963'''\n\nВТБ:\n'''2200246091065709'''\n\nПо номеру телефона:\n'''+7 (929) 657-46-27'''\nЕкатерина Александровка К.\n\n*ПОСЛЕ СОВЕРШЕНИЯ ОПЛАТЫ*\n\nПожалуйста, напиши свое *ФИО*\n\n_Пример: Иванов Иван Иваныч_\n\n_Если ты начал/а процесс регистрации, пожалуйста, пройди его до конца. Если после введения ФИО бот не дает  ответа - нажми заново /start_"
+rules_dict = ['/Users/formalraindbow43/Downloads/Telegram Desktop/правила_1 (1).png', '/Users/formalraindbow43/Downloads/Telegram Desktop/правила_2 (1).png']
+bar_dict= ['/Users/formalraindbow43/Downloads/Telegram Desktop/photo_1.jpeg', '/Users/formalraindbow43/Downloads/Telegram Desktop/photo_2.jpeg',
+            '/Users/formalraindbow43/Downloads/Telegram Desktop/photo_3.jpeg','/Users/formalraindbow43/Downloads/Telegram Desktop/photo_4.jpeg',
+            '/Users/formalraindbow43/Downloads/Telegram Desktop/photo_5.jpeg', '/Users/formalraindbow43/Downloads/Telegram Desktop/photo_6.jpeg',
+            '/Users/formalraindbow43/Downloads/Telegram Desktop/photo_7.jpeg', '/Users/formalraindbow43/Downloads/Telegram Desktop/photo_8.jpeg']
+
+loft = '/Users/formalraindbow43/Downloads/Telegram Desktop/photo_loft.jpeg'
 # меню для нс
 
 @bot.callback_query_handler(func=lambda call:True)
@@ -28,7 +43,7 @@ def callback_query(call):
     if call.data == 'menu_da':
         start(call)
     elif call.data == "menu_da1":
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
+        bot.edit_message_text(chat_id=call.message.chat.id,  message_text_oplata=call.message.message_text_oplata, text="_Производятся изменения..._", parse_mode="Markdown")
         start(call)
     elif call.data == 'da':
         bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
@@ -36,50 +51,56 @@ def callback_query(call):
     elif call.data == 'net':
         bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Изменяем данные..._", parse_mode="Markdown")
         vozvrat(call)
-    elif call.data == 'friends':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога от друзей принята!_", parse_mode="Markdown")
-        for_who = call.data
-        razvodka_change_from_who(call)
-    elif call.data == 'odnogroup':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога от одногруппников/однокурсников принята!_", parse_mode="Markdown")
-        for_who = call.data
-        razvodka_change_from_who(call)
-    elif call.data == 'social':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога из соцсетей принята!_", parse_mode="Markdown")
-        for_who = call.data
-        razvodka_change_from_who(call)
-    elif call.data == 'posvat':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты пришел/ла на Ночь Социолога побывав на посвяте принята!_", parse_mode="Markdown")
-        for_who = call.data
-        razvodka_change_from_who(call)
-    elif call.data == 'another':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога из другого источника принята!_", parse_mode="Markdown")
-        for_who = call.data
-        razvodka_change_from_who(call)
-    elif call.data == 'social_studies':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета социальных наук принята!_", parse_mode="Markdown")
-        for_where = call.data
-        razvodka_change_facultet(call)
-    elif call.data == 'computer_studies':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета компьютерных наук принята!_", parse_mode="Markdown")
-        for_where = call.data
-        razvodka_change_facultet(call)
-    elif call.data == 'human_studies':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета гуманитарных наук принята!_", parse_mode="Markdown")
-        for_where = call.data
-        razvodka_change_facultet(call)
-    elif call.data == 'natural_studies':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета естественных наук принята!_", parse_mode="Markdown")
-        for_where = call.data
-        razvodka_change_facultet(call)
-    elif call.data == 'physical_studies':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета физических наук принята!_", parse_mode="Markdown")
-        for_where = call.data
-        razvodka_change_facultet(call)
-    elif call.data == 'another_studies':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с другого факультета или не учишься вузе принята!_", parse_mode="Markdown")
-        for_where = call.data
-        razvodka_change_facultet(call)
+    elif call.data == 'da2':
+        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
+        priem_data2(call)
+    elif call.data == 'net2':
+        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Изменяем данные..._", parse_mode="Markdown")
+        vozvrat(call)
+    #elif call.data == 'friends':
+       # bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога от друзей принята!_", parse_mode="Markdown")
+        #for_who = call.data
+        #razvodka_change_from_who(call)
+   # elif call.data == 'odnogroup':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога от одногруппников/однокурсников принята!_", parse_mode="Markdown")
+        #for_who = call.data
+        #razvodka_change_from_who(call)
+    #elif call.data == 'social':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога из соцсетей принята!_", parse_mode="Markdown")
+        #for_who = call.data
+        #razvodka_change_from_who(call)
+    #elif call.data == 'posvat':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты пришел/ла на Ночь Социолога побывав на посвяте принята!_", parse_mode="Markdown")
+        #for_who = call.data
+        #razvodka_change_from_who(call)
+    #elif call.data == 'another':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты узнал/ла о Ночи Социолога из другого источника принята!_", parse_mode="Markdown")
+        #for_who = call.data
+        #razvodka_change_from_who(call)
+    #elif call.data == 'social_studies':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета социальных наук принята!_", parse_mode="Markdown")
+        #for_where = call.data
+        #razvodka_change_facultet(call)
+    #elif call.data == 'computer_studies':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета компьютерных наук принята!_", parse_mode="Markdown")
+        #for_where = call.data
+        #razvodka_change_facultet(call)
+    #elif call.data == 'human_studies':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета гуманитарных наук принята!_", parse_mode="Markdown")
+        #for_where = call.data
+        #razvodka_change_facultet(call)
+    #elif call.data == 'natural_studies':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета естественных наук принята!_", parse_mode="Markdown")
+        #for_where = call.data
+        #razvodka_change_facultet(call)
+    #elif call.data == 'physical_studies':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с факультета физических наук принята!_", parse_mode="Markdown")
+        #for_where = call.data
+        #razvodka_change_facultet(call)
+    #elif call.data == 'another_studies':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Информация о том, что ты с другого факультета или не учишься вузе принята!_", parse_mode="Markdown")
+        #for_where = call.data
+        #razvodka_change_facultet(call)
     elif call.data == 'menu_oplata':
         start(call)
     elif call.data == 'menu_info':
@@ -99,76 +120,101 @@ def callback_query(call):
     elif call.data =='change_fio':
         bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
         change_fio_kostyl(call)
-    elif call.data =='change_university':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
-        change_university_kostyl(call)
-    elif call.data =='change_facultet':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
-        change_facultet_kostyl(call)
-    elif call.data =='change_from_who':
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
-        change_from_who_kostyl(call)
+   # elif call.data =='change_university':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
+        #change_university_kostyl(call)
+    #elif call.data =='change_facultet':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
+        #change_facultet_kostyl(call)
+    #elif call.data =='change_from_who':
+        #bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
+        #change_from_who_kostyl(call)
     elif call.data =='change_another':
         bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="_Производятся изменения..._", parse_mode="Markdown")
         change_another_kostyl(call)
     elif call.data == "yes_grade":
-        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="Начинаем оплату...")
+        keyboard = types.InlineKeyboardMarkup()
+        btn_fourth_year = types.InlineKeyboardButton(text='Четверокурсник', callback_data='buy_as_fourth_year')
+        btn_plus_one = types.InlineKeyboardButton(text='+1', callback_data='buy_as_plus_one')
+        keyboard.add(btn_fourth_year, btn_plus_one)
+        bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text="Ты покупаешь билет как четверокурсник или билет +1?", reply_markup=keyboard)
+    elif call.data == "buy_as_fourth_year":
         buy_bilet(call)
+    elif call.data == "buy_as_plus_one":
+        keyboard = types.InlineKeyboardMarkup()
+        btn_yes_data = types.InlineKeyboardButton(text='Да', callback_data='yes_+1', one_time_keyboard=True)
+        btn_no_data = types.InlineKeyboardButton(text='Нет', callback_data='no_+1', one_time_keyboard=True)
+        keyboard.add(btn_yes_data, btn_no_data)
+        bot.send_message(call.message.chat.id, text="Твоих данных нет в списке четверокурсников. Ты собираешься купить билет +1?", reply_markup=keyboard)
+    elif call.data == "yes_+1":
+        bot.send_message(call.message.chat.id, text="Напиши ФИО четверокурсника, который тебя позвал")
+        bot.register_next_step_handler(call.message, ask_friend_fio)
+    elif call.data == 'no_+1':
+        keyboard = types.InlineKeyboardMarkup()
+        btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
+        bot.send_message(call.message,
+                         text='Хочешь вернуться в главное меню?', reply_markup=keyboard)
     elif call.data == "no_grade":
         bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="Обрабатываем запрос...")
         no_grade_unswer(call)
+    elif call.data == "yes_data":
+        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="Производим изменения...")
+        yes_data_unswer(call)
+    elif call.data == "no_data":
+        bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="Производим изменения...")
+        no_data_unswer(call)
     elif call.data == 'menu_osninfo':
         menu_osninfo(call)
-    elif call.data == 'menu_pravila':
-        with open('/home/romanloqi/code/guest_page.json', 'r') as f:
-            user_stat = json.load(f)
-        chat_id_2 = call.message.chat.id
-        if str(chat_id_2) not in user_stat:
-            user_stat[str(chat_id_2)] = {"page_bar": 1, "page_rules": 1}
-            with open('/home/romanloqi/code/guest_page.json', 'w') as f:
-                json.dump(user_stat, f)
-        menu_pravila(chat_id_2, user_stat)
-    elif call.data == 'menu_bar':
-        with open('/home/romanloqi/code/guest_page.json', 'r') as f:
-            user_stat = json.load(f)
-        chat_id_2 = call.message.chat.id
-        if str(chat_id_2) not in user_stat:
-            user_stat[str(chat_id_2)] = {"page_bar": 1, "page_rules": 1}
-            with open('/home/romanloqi/code/guest_page.json', 'w') as f:
-                json.dump(user_stat, f)
-        menu_bar(chat_id_2, user_stat)
-    elif call.data == 'menu_loft':
-        menu_loft(call)
-    elif call.data in ['prev_page_pr','next_page_pr']:
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-        count = len(rules_dict)
-        with open('/home/romanloqi/code/guest_page.json', 'r') as f:
-            user_stat = json.load(f)
-        chat_id_2 = call.message.chat.id
-        page = user_stat[str(chat_id_2)]["page_rules"]
-        if call.data == 'prev_page_pr':
-            page = page - 1 if page > 1 else count
-        elif call.data == 'next_page_pr':
-            page = page + 1 if page < count else 1
-        user_stat[str(chat_id_2)]["page_rules"] = page
-        with open('/home/romanloqi/code/guest_page.json', 'w') as of:
-            json.dump(user_stat, of)
-        menu_pravila(chat_id_2, user_stat)
-    elif call.data in ['prev_page_bar','next_page_bar']:
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-        count = len(bar_dict)
-        with open('/home/romanloqi/code/guest_page.json', 'r') as f:
-            user_stat = json.load(f)
-        chat_id_2 = call.message.chat.id
-        page = user_stat[str(chat_id_2)]["page_bar"]
-        if call.data == 'prev_page_bar':
-            page = page - 1 if page > 1 else count
-        elif call.data == 'next_page_bar':
-            page = page + 1 if page < count else 1
-        user_stat[str(chat_id_2)]["page_bar"] = page
-        with open('/home/romanloqi/code/guest_page.json', 'w') as of:
-            json.dump(user_stat, of)
-        menu_bar(chat_id_2, user_stat)
+    #elif call.data == 'menu_pravila':
+        #with open('/home/romchikhamrin/telebot/guest_page.json', 'r') as f:
+            #user_stat = json.load(f)
+        #chat_id_2 = call.message.chat.id
+        #if str(chat_id_2) not in user_stat:
+            #user_stat[str(chat_id_2)] = {"page_bar": 1, "page_rules": 1}
+            #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guest_page.json', 'w') as f:
+                #json.dump(user_stat, f)
+        #menu_pravila(chat_id_2, user_stat)
+    #elif call.data == 'menu_bar':
+        #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guest_page.json', 'r') as f:
+            #user_stat = json.load(f)
+        #chat_id_2 = call.message.chat.id
+        #if str(chat_id_2) not in user_stat:
+            #user_stat[str(chat_id_2)] = {"page_bar": 1, "page_rules": 1}
+            #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guest_page.json', 'w') as f:
+                #json.dump(user_stat, f)
+        #menu_bar(chat_id_2, user_stat)
+    #elif call.data == 'menu_loft':
+        #menu_loft(call)
+    #elif call.data in ['prev_page_pr','next_page_pr']:
+        #bot.delete_message(call.message.chat.id, call.message.message_id)
+        #count = len(rules_dict)
+        #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guest_page.json', 'r') as f:
+            #user_stat = json.load(f)
+        #chat_id_2 = call.message.chat.id
+        #page = user_stat[str(chat_id_2)]["page_rules"]
+        #if call.data == 'prev_page_pr':
+            #page = page - 1 if page > 1 else count
+        #elif call.data == 'next_page_pr':
+            #page = page + 1 if page < count else 1
+        #user_stat[str(chat_id_2)]["page_rules"] = page
+        #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guest_page.json', 'w') as of:
+            #json.dump(user_stat, of)
+        #menu_pravila(chat_id_2, user_stat)
+    #elif call.data in ['prev_page_bar','next_page_bar']:
+        #bot.delete_message(call.message.chat.id, call.message.message_id)
+        #count = len(bar_dict)
+        #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guest_page.json', 'r') as f:
+            #user_stat = json.load(f)
+        #chat_id_2 = call.message.chat.id
+        #page = user_stat[str(chat_id_2)]["page_bar"]
+        #if call.data == 'prev_page_bar':
+            #page = page - 1 if page > 1 else count
+        #elif call.data == 'next_page_bar':
+            #page = page + 1 if page < count else 1
+        #user_stat[str(chat_id_2)]["page_bar"] = page
+        #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guest_page.json', 'w') as of:
+            #json.dump(user_stat, of)
+        #menu_bar(chat_id_2, user_stat)
 
 
 
@@ -232,7 +278,7 @@ def menu_osninfo(message):
                      reply_markup=keyboard, parse_mode="Markdown")
 
 def razvodka_change_facultet(message):
-    with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
@@ -242,7 +288,7 @@ def razvodka_change_facultet(message):
         global data, kostyl,university,for_who, from_where
         try:
             data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
-            with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
+            with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
                 file_read = f.read()
                 if file_read != '':
                     words = json.loads(file_read)
@@ -250,7 +296,7 @@ def razvodka_change_facultet(message):
                     words = dict()
                 old_datetime = words[message.from_user.username][7]
                 words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], university[message.from_user.id], for_where, for_who, old_datetime]
-            with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
+            with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
                 json.dump(words, f)
                 print(words[message.from_user.username])
         except KeyError:
@@ -266,7 +312,7 @@ def razvodka_change_facultet(message):
         buy_bilet_from_who(message)
 
 def razvodka_change_from_who(message):
-    with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
@@ -276,7 +322,7 @@ def razvodka_change_from_who(message):
         global data, kostyl,university,for_who, from_where
         try:
             data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
-            with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
+            with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
                 file_read = f.read()
                 if file_read != '':
                     words = json.loads(file_read)
@@ -284,7 +330,7 @@ def razvodka_change_from_who(message):
                     words = dict()
                 old_datetime = words[message.from_user.username][7]
                 words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], university[message.from_user.id], for_where, for_who, old_datetime]
-            with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
+            with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
                 json.dump(words, f)
                 print(words[message.from_user.username])
         except KeyError:
@@ -307,13 +353,19 @@ def vozvrat(message):
     msg = bot.send_message(message.from_user.id, 'Введи свое ФИО заново')
     bot.register_next_step_handler(msg, buy_bilet_data)
 
+def vozvrat2(message):
+    data[message.from_user.id]=""
+    university[message.from_user.id]=""
+    msg = bot.send_message(message.from_user.id, 'Введи свое ФИО заново')
+    bot.register_next_step_handler(msg, buy_bilet_data_plus)
+
 def priem_data(message):
     global data, kostyl,university,for_who, from_where
     try:
         data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
         tz=pytz.timezone('Europe/Moscow')
         current_datetime = datetime.now(tz).isoformat(sep='T', timespec='seconds')
-        with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
+        with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
             file_read = f.read()
             if file_read != '':
                 words = json.loads(file_read)
@@ -322,10 +374,10 @@ def priem_data(message):
         if message.from_user.username in words and data_list[:3] != ['0', '-', '-']:
             old_datetime = words[message.from_user.username][7]
             words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], old_datetime]
-        elif message.from_user.username not in words:
+        elif (message.from_user.username not in words):
             words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], current_datetime]
     #words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], group[message.from_user.id]]
-        with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
+        with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
             json.dump(words, f)
             print(words[message.from_user.username])
     except KeyError:
@@ -337,20 +389,49 @@ def priem_data(message):
     bot.send_message(message.from_user.id,
                          text='Поздравляем! Ты зарегистрировался на After Grade Party’24!\n\nПодтверждение оплаты можно будет узнать чуть позже, следи за информицей в нашей группе.\n\nНа данном этапе ты можешь вернуться в главное меню.', reply_markup=keyboard)
 
+def priem_data2(message):
+    global data, kostyl,university,for_who, from_where, friend_fio
+    try:
+        data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
+        tz=pytz.timezone('Europe/Moscow')
+        current_datetime = datetime.now(tz).isoformat(sep='T', timespec='seconds')
+        with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+            file_read = f.read()
+            if file_read != '':
+                words = json.loads(file_read)
+            else:
+                words = dict()
+        if message.from_user.username in words and data_list[:3] != ['0', '-', '-']:
+            old_datetime = words[message.from_user.username][4]
+            words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], old_datetime, friend_fio]
+        elif (message.from_user.username not in words):
+            words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], current_datetime, friend_fio]
+    #words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], group[message.from_user.id]]
+        with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
+            json.dump(words, f)
+            print(words[message.from_user.username])
+    except KeyError:
+        pass
+
+    keyboard = types.InlineKeyboardMarkup()
+    btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
+    keyboard.add(btn_menu)
+    bot.send_message(message.from_user.id,
+                         text='Поздравляем! Ты зарегистрировался на After Grade Party’24!\n\nПодтверждение оплаты можно будет узнать чуть позже, следи за информицей в нашей группе.\n\nНа данном этапе ты можешь вернуться в главное меню.', reply_markup=keyboard)
 
 def change_fio_kostyl(message):
     a = bot.send_message(message.from_user.id,text='Введи свое ФИО заново')
     bot.register_next_step_handler(a, change_fio)
 
-def change_university_kostyl(message):
-    a = bot.send_message(message.from_user.id,text='Введи свой ВУЗ заново')
-    bot.register_next_step_handler(a, change_university)
+#def change_university_kostyl(message):
+    #a = bot.send_message(message.from_user.id,text='Введи свой ВУЗ заново')
+    #bot.register_next_step_handler(a, change_university)
 
-def change_facultet_kostyl(message):
-    change_facultet(message)
+#def change_facultet_kostyl(message):
+    #change_facultet(message)
 
-def change_from_who_kostyl(message):
-    change_from_who(message)
+#def change_from_who_kostyl(message):
+    #change_from_who(message)
 
 def change_another_kostyl(message):
     change_another(message)
@@ -374,7 +455,7 @@ def change_data(message):
                             text='Выбери то, что желаешь изменить!', reply_markup=keyboard)
 
 def change_fio(message): #Проверка на тип данных str
-    global data, kostyl,university,for_who, from_where
+    global data, kostyl,university,for_who, from_where, friend_fio
     if isinstance(message.text, str):
         try:
             data[message.from_user.id] = message.text
@@ -384,15 +465,15 @@ def change_fio(message): #Проверка на тип данных str
                 for i in range(3-len(message.text.split())):
                     data[message.from_user.id]+=" -"
             data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
-            with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
+            with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
                 file_read = f.read()
                 if file_read != '':
                     words = json.loads(file_read)
                 else:
                     words = dict()
                 old_datetime = words[message.from_user.username][4]
-                words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], old_datetime]
-            with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
+                words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], old_datetime, friend_fio]
+            with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
                 json.dump(words, f)
                 print(words[message.from_user.username])
 
@@ -409,67 +490,67 @@ def change_fio(message): #Проверка на тип данных str
         bot.register_next_step_handler(a, change_fio)
 
 
-def change_university(message):
-    global data, kostyl,university,for_who, from_where
-    if isinstance(message.text, str):
-        try:
-            university[message.from_user.id] = message.text
-            data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
-            with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
-                file_read = f.read()
-                if file_read != '':
-                    words = json.loads(file_read)
-                else:
-                    words = dict()
-                old_datetime = words[message.from_user.username][7]
-                words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], university[message.from_user.id], for_where, for_who, old_datetime]
-            with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
-                json.dump(words, f)
-                print(words[message.from_user.username])
-        except KeyError:
-            pass
-        keyboard = types.InlineKeyboardMarkup()
-        btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
-        keyboard.add(btn_menu)
-        bot.send_message(message.from_user.id,
-                         text='Твой ВУЗ изменен успешно!', reply_markup=keyboard)
-    else:
-        a = bot.send_message(message.from_user.id, text="Пожалуйста, введите корректные данные :)", parse_mode="Markdown") #Можешь изменить текст, который будет присылаться юзеру при ошибочном вводе
-        bot.register_next_step_handler(a, change_university)
+#def change_university(message):
+    #global data, kostyl,university,for_who, from_where
+    #if isinstance(message.text, str):
+        #try:
+            #university[message.from_user.id] = message.text
+            #data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
+            #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guests_grade.json', 'r', encoding='UTF-8') as f:
+                #file_read = f.read()
+                #if file_read != '':
+                   # words = json.loads(file_read)
+                #else:
+                    #words = dict()
+                #old_datetime = words[message.from_user.username][7]
+                #words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], university[message.from_user.id], for_where, for_who, old_datetime]
+            #with open('/Users/formalraindbow43/Downloads/Telegram Desktop/guests_grade.json', 'w', encoding='UTF-8') as f:
+                #json.dump(words, f)
+                #print(words[message.from_user.username])
+       # except KeyError:
+            #pass
+        ##keyboard = types.InlineKeyboardMarkup()
+        #btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
+        #keyboard.add(btn_menu)
+        #bot.send_message(message.from_user.id,
+                         #text='Твой ВУЗ изменен успешно!', reply_markup=keyboard)
+    #else:
+        #a = bot.send_message(message.from_user.id, text="Пожалуйста, введите корректные данные :)", parse_mode="Markdown") #Можешь изменить текст, который будет присылаться юзеру при ошибочном вводе
+        #bot.register_next_step_handler(a, change_university)
 
-def change_facultet(message):
-    keyboard = types.InlineKeyboardMarkup()
-    btn_social_studies = types.InlineKeyboardButton(text='Социальные науки', callback_data='social_studies',one_time_keyboard=True)
-    keyboard.add(btn_social_studies)
-    btn_computer_studies = types.InlineKeyboardButton(text='Компьютерные науки', callback_data='computer_studies',one_time_keyboard=True)
-    keyboard.add(btn_computer_studies)
-    btn_human_studies = types.InlineKeyboardButton(text='Гуманитарные науки', callback_data='human_studies',one_time_keyboard=True)
-    keyboard.add(btn_human_studies)
-    btn_natural_studies = types.InlineKeyboardButton(text='Естественные науки', callback_data='natural_studies', one_time_keyboard=True)
-    keyboard.add(btn_natural_studies)
-    btn_physical_studies = types.InlineKeyboardButton(text='Физические науки', callback_data='physical_studies', one_time_keyboard=True)
-    keyboard.add(btn_physical_studies)
-    btn_another_studies = types.InlineKeyboardButton(text='Другое/не учусь в вузе', callback_data='another_studies', one_time_keyboard=True)
-    keyboard.add(btn_another_studies)
+#def change_facultet(message):
+    #keyboard = types.InlineKeyboardMarkup()
+    #btn_social_studies = types.InlineKeyboardButton(text='Социальные науки', callback_data='social_studies',one_time_keyboard=True)
+    #keyboard.add(btn_social_studies)
+    #btn_computer_studies = types.InlineKeyboardButton(text='Компьютерные науки', callback_data='computer_studies',one_time_keyboard=True)
+    #keyboard.add(btn_computer_studies)
+    #btn_human_studies = types.InlineKeyboardButton(text='Гуманитарные науки', callback_data='human_studies',one_time_keyboard=True)
+    #keyboard.add(btn_human_studies)
+    #btn_natural_studies = types.InlineKeyboardButton(text='Естественные науки', callback_data='natural_studies', one_time_keyboard=True)
+    #keyboard.add(btn_natural_studies)
+    #btn_physical_studies = types.InlineKeyboardButton(text='Физические науки', callback_data='physical_studies', one_time_keyboard=True)
+    #keyboard.add(btn_physical_studies)
+    #btn_another_studies = types.InlineKeyboardButton(text='Другое/не учусь в вузе', callback_data='another_studies', one_time_keyboard=True)
+    #keyboard.add(btn_another_studies)
 
-    bot.send_message(message.from_user.id,
-                            text='Выбери заново, с какого ты факультета!', reply_markup=keyboard)
+    #bot.send_message(message.from_user.id,
+                            #text='Выбери заново, с какого ты факультета!', reply_markup=keyboard)
 
-def change_from_who(message):
-    keyboard = types.InlineKeyboardMarkup()
-    btn_friends = types.InlineKeyboardButton(text='От друзей', callback_data='friends', one_time_keyboard=True)
-    keyboard.add(btn_friends)
-    btn_odnogroup = types.InlineKeyboardButton(text='От одногруппников/однокурсников', callback_data='odnogroup', one_time_keyboard=True)
-    keyboard.add(btn_odnogroup)
-    btn_social = types.InlineKeyboardButton(text='Из соцсетей', callback_data='social', one_time_keyboard=True)
-    keyboard.add(btn_social)
-    btn_posvat = types.InlineKeyboardButton(text='Пришел/ла с посвята', callback_data='posvat', one_time_keyboard=True)
-    keyboard.add(btn_posvat)
-    btn_another = types.InlineKeyboardButton(text='Другое', callback_data='another', one_time_keyboard=True)
-    keyboard.add(btn_another)
+#def change_from_who(message):
+    #keyboard = types.InlineKeyboardMarkup()
+    #btn_friends = types.InlineKeyboardButton(text='От друзей', callback_data='friends', one_time_keyboard=True)
+    #keyboard.add(btn_friends)
+    #btn_odnogroup = types.InlineKeyboardButton(text='От одногруппников/однокурсников', callback_data='odnogroup', one_time_keyboard=True)
+    #keyboard.add(btn_odnogroup)
+    #btn_social = types.InlineKeyboardButton(text='Из соцсетей', callback_data='social', one_time_keyboard=True)
+    #keyboard.add(btn_social)
+    #btn_posvat = types.InlineKeyboardButton(text='Пришел/ла с посвята', callback_data='posvat', one_time_keyboard=True)
+    #keyboard.add(btn_posvat)
+    #btn_another = types.InlineKeyboardButton(text='Другое', callback_data='another', one_time_keyboard=True)
+    #keyboard.add(btn_another)
 
-    bot.send_message(message.from_user.id,
-                            text='Выбери заново, откуда ты узнал/ла о Ночи Социолога!', reply_markup=keyboard)
+    #bot.send_message(message.from_user.id,
+                            #text='Выбери заново, откуда ты узнал/ла о Ночи Социолога!', reply_markup=keyboard)
 
 def change_another(message):
     keyboard = types.InlineKeyboardMarkup()
@@ -481,7 +562,8 @@ def change_another(message):
 
 
 def buy_bilet_group_proverka(message):
-
+    global data
+    data[message.from_user.id] = message.text
     keyboard = types.InlineKeyboardMarkup()
     btn_da = types.InlineKeyboardButton(text='Да', callback_data='da', one_time_keyboard=True)
     keyboard.add(btn_da)
@@ -490,97 +572,202 @@ def buy_bilet_group_proverka(message):
     bot.send_message(message.from_user.id,
                             text='Спасибо! А теперь проверь, всё ли введено верно: Ты — ' + data[message.from_user.id] + '?' ' Нажми «да», если все верно, и «нет» — если нужно перезаписать данные.\n\n*ВАЖНО — НЕ ЗАБУДЬ НАЖАТЬ НА КНОПКУ «ДА» ЕСЛИ ВСЕ ВЕРНО*, иначе твои данные не будут записаны.', reply_markup=keyboard, parse_mode="Markdown")
 
-
-
-def buy_bilet_from_who(message):
-
+def buy_bilet_group_proverka2(message):
+    global data
+    data[message.from_user.id] = message.text
     keyboard = types.InlineKeyboardMarkup()
-    btn_friends = types.InlineKeyboardButton(text='От друзей', callback_data='friends', one_time_keyboard=True)
-    keyboard.add(btn_friends)
-    btn_odnogroup = types.InlineKeyboardButton(text='От одногруппников/однокурсников', callback_data='odnogroup', one_time_keyboard=True)
-    keyboard.add(btn_odnogroup)
-    btn_social = types.InlineKeyboardButton(text='Из соцсетей', callback_data='social', one_time_keyboard=True)
-    keyboard.add(btn_social)
-    btn_posvat = types.InlineKeyboardButton(text='Пришел/а с посвята', callback_data='posvat', one_time_keyboard=True)
-    keyboard.add(btn_posvat)
-    btn_another = types.InlineKeyboardButton(text='Другое', callback_data='another', one_time_keyboard=True)
-    keyboard.add(btn_another)
-
+    btn_da = types.InlineKeyboardButton(text='Да', callback_data='da2', one_time_keyboard=True)
+    keyboard.add(btn_da)
+    btn_net = types.InlineKeyboardButton(text='Нет', callback_data='net2',one_time_keyboard=True)
+    keyboard.add(btn_net)
     bot.send_message(message.from_user.id,
-                            text='Откуда ты узнал/ла о тусовке «Ночь социолога?»', reply_markup=keyboard)
+                            text='Спасибо! А теперь проверь, всё ли введено верно: Ты — ' + data[message.from_user.id] + '?' ' Нажми «да», если все верно, и «нет» — если нужно перезаписать данные.\n\n*ВАЖНО — НЕ ЗАБУДЬ НАЖАТЬ НА КНОПКУ «ДА» ЕСЛИ ВСЕ ВЕРНО*, иначе твои данные не будут записаны.', reply_markup=keyboard, parse_mode="Markdown")
+
+
+#def buy_bilet_from_who(message):
+
+    ###keyboard = types.InlineKeyboardMarkup()
+    ##btn_friends = types.InlineKeyboardButton(text='От друзей', callback_data='friends', one_time_keyboard=True)
+    #keyboard.add(btn_friends)
+    #btn_odnogroup = types.InlineKeyboardButton(text='От одногруппников/однокурсников', callback_data='odnogroup', one_time_keyboard=True)
+    #keyboard.add(btn_odnogroup)
+    #btn_social = types.InlineKeyboardButton(text='Из соцсетей', callback_data='social', one_time_keyboard=True)
+    #keyboard.add(btn_social)
+    #btn_posvat = types.InlineKeyboardButton(text='Пришел/а с посвята', callback_data='posvat', one_time_keyboard=True)
+    #keyboard.add(btn_posvat)
+    #btn_another = types.InlineKeyboardButton(text='Другое', callback_data='another', one_time_keyboard=True)
+    #keyboard.add(btn_another)
+
+    #bot.send_message(message.from_user.id,
+                            #text='Откуда ты узнал/ла о тусовке «Ночь социолога?»', reply_markup=keyboard)
 
 
 
 
-def buy_bilet_from_where(message):
+#def buy_bilet_from_where(message):
 
-    keyboard = types.InlineKeyboardMarkup()
-    btn_social_studies = types.InlineKeyboardButton(text='Социальные науки', callback_data='social_studies',one_time_keyboard=True)
-    keyboard.add(btn_social_studies)
-    btn_computer_studies = types.InlineKeyboardButton(text='Компьютерные науки', callback_data='computer_studies',one_time_keyboard=True)
-    keyboard.add(btn_computer_studies)
-    btn_human_studies = types.InlineKeyboardButton(text='Гуманитарные науки', callback_data='human_studies',one_time_keyboard=True)
-    keyboard.add(btn_human_studies)
-    btn_natural_studies = types.InlineKeyboardButton(text='Естественные науки', callback_data='natural_studies', one_time_keyboard=True)
-    keyboard.add(btn_natural_studies)
-    btn_physical_studies = types.InlineKeyboardButton(text='Физические науки', callback_data='physical_studies', one_time_keyboard=True)
-    keyboard.add(btn_physical_studies)
-    btn_another_studies = types.InlineKeyboardButton(text='Другое/не учусь в вузе', callback_data='another_studies', one_time_keyboard=True)
-    keyboard.add(btn_another_studies)
+    #keyboard = types.InlineKeyboardMarkup()
+    #btn_social_studies = types.InlineKeyboardButton(text='Социальные науки', callback_data='social_studies',one_time_keyboard=True)
+    #keyboard.add(btn_social_studies)
+    #btn_computer_studies = types.InlineKeyboardButton(text='Компьютерные науки', callback_data='computer_studies',one_time_keyboard=True)
+    #keyboard.add(btn_computer_studies)
+    #btn_human_studies = types.InlineKeyboardButton(text='Гуманитарные науки', callback_data='human_studies',one_time_keyboard=True)
+    #keyboard.add(btn_human_studies)
+    #btn_natural_studies = types.InlineKeyboardButton(text='Естественные науки', callback_data='natural_studies', one_time_keyboard=True)
+    #keyboard.add(btn_natural_studies)
+    #btn_physical_studies = types.InlineKeyboardButton(text='Физические науки', callback_data='physical_studies', one_time_keyboard=True)
+    #keyboard.add(btn_physical_studies)
+    #btn_another_studies = types.InlineKeyboardButton(text='Другое/не учусь в вузе', callback_data='another_studies', one_time_keyboard=True)
+    #keyboard.add(btn_another_studies)
 
-    bot.send_message(message.from_user.id,
-                            text='На каком факультете ты учишься?', reply_markup=keyboard)
-
-
+    #bot.send_message(message.from_user.id,
+                            #text='На каком факультете ты учишься?', reply_markup=keyboard)
 
 
-def proverka_group(message):
-    if isinstance(message.text, str): #Проверка на тип данных str
-        global university
-        university[message.from_user.id] = message.text
-        buy_bilet_from_where(message)
-    else:
-        a = bot.send_message(message.from_user.id, text="Пожалуйста, введите корректные данные :)", parse_mode="Markdown") #Можешь изменить текст, который будет присылаться юзеру при ошибочном вводе
-        bot.register_next_step_handler(a, proverka_group)
+
+
+#def proverka_group(message):
+    #if isinstance(message.text, str): #Проверка на тип данных str
+        #global university
+        #university[message.from_user.id] = message.text
+        #buy_bilet_from_where(message)
+    #else:
+        #a = bot.send_message(message.from_user.id, text="Пожалуйста, введите корректные данные :)", parse_mode="Markdown") #Можешь изменить текст, который будет присылаться юзеру при ошибочном вводе
+        #bot.register_next_step_handler(a, proverka_group)
 
 
 def buy_bilet_data(message):
     if isinstance(message.text, str): #Проверка на тип данных str
         global data
         data[message.from_user.id] = message.text
+        user_id = message.from_user.id
+        username = message.from_user.username
 
         if len(message.text.split())<3:
-
             for i in range(3-len(message.text.split())):
                 data[message.from_user.id]+=" -"
-
-        bot.send_message(message.from_user.id, '_Данные получены_', parse_mode="Markdown")
-        buy_bilet_group_proverka(message)
+        full_name = data[message.from_user.id]
+        if full_name in names_list:
+            if username in username_list:
+                bot.send_message(message.from_user.id, '_Данные получены_', parse_mode="Markdown")
+                buy_bilet_group_proverka(message)
+            else:
+                bot.send_message(message.from_user.id, text="Извини, но твоего username нет в нашем списке четвертого курса. Обратись в личные сообщения к [Асе](https://t.me/asyafomichewa), указав, что твой username отсутствует в списках.", parse_mode="Markdown")
+        else:
+            bot.send_message(message.from_user.id, text="_Что-то не так_", parse_mode="Markdown") #Можешь изменить текст, который будет присылаться юзеру при ошибочном вводе
+            kostel_for_data(message)
     else:
         a = bot.send_message(message.from_user.id, text="Пожалуйста, введите корректные данные :)", parse_mode="Markdown") #Можешь изменить текст, который будет присылаться юзеру при ошибочном вводе
         bot.register_next_step_handler(a, buy_bilet_data)
 
-#def proverka_grade(message):
-    #keyboard = types.InlineKeyboardMarkup()
-    #btn_yes_grade = types.InlineKeyboardButton(text='Да', callback_data='yes_grade',one_time_keyboard=True)
-    #keyboard.add(btn_yes_grade)
-    #btn_no_grade = types.InlineKeyboardButton(text='Нет', callback_data='no_grade',one_time_keyboard=True)
-    #keyboard.add(btn_no_grade)
-    #btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da1')
-    #keyboard.add(btn_menu)
-    #bot.send_message(message.from_user.id,
-                         #text="Перед покупкой билета мы хотим оповестить тебя о некоторых правилах нашего мероприятия:\n\n- After Grade Party’24 в первую очередь предназначена для выпускников, и пока продажа билетов идет только для них.\n\n- Выпускники смогут взять с собой друзей, но информация об этом будет позже в нашей группе.\n\nЕсли согласен с правилами, нажми “Да” ниже.", reply_markup=keyboard)
+def yes_data_unswer(message):
+    keyboard = types.InlineKeyboardMarkup()
+    btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
+    keyboard.add(btn_menu)
+    a = bot.send_message(message.from_user.id,
+                         text="Укажи *имя пользователя* друга, который тебя пригласил в *телеграмм*! Сделать это можно нажав на его профиль -> имя пользователя")
+    bot.register_next_step_handler(a, ask_friend_fio)
+
+def buy_bilet_data_plus(message):
+    global  data
+    try:
+        data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
+        tz=pytz.timezone('Europe/Moscow')
+        current_datetime = datetime.now(tz).isoformat(sep='T', timespec='seconds')
+        with open('/home/romchikhamrin/telebot/users.json', 'r', encoding='UTF-8') as f:
+            file_read = f.read()
+            if file_read != '':
+                words = json.loads(file_read)
+            else:
+                words = dict()
+        if message.from_user.username in words and data_list[:3] != ['0', '-', '-']:
+            old_datetime = words[message.from_user.username][7]
+            words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], old_datetime]
+        elif message.from_user.username not in words:
+            words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], current_datetime]
+    #words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], group[message.from_user.id]]
+        with open('/home/romchikhamrin/telebot/users.json', 'w', encoding='UTF-8') as f:
+            json.dump(words, f)
+            print(words[message.from_user.username])
+    except KeyError:
+        pass
+
+    keyboard = types.InlineKeyboardMarkup()
+    btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
+    keyboard.add(btn_menu)
+    bot.send_message(message.from_user.id,
+                         text='Поздравляем! Ты зарегистрировался на After Grade Party’24!\n\nПодтверждение оплаты можно будет узнать чуть позже, следи за информицей в нашей группе.\n\nНа данном этапе ты можешь вернуться в главное меню.', reply_markup=keyboard)
+
+
+def ask_friend_fio(message):
+    global friend_fio
+    friend_fio[message.from_user.id] = message.text
+    keyboard = types.InlineKeyboardMarkup()
+    btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
+    keyboard.add(btn_menu)
+    for friend_fio in friends_dict:
+        if friend_fio in friends_dict:
+            for inviter, invitee in users_dict.items():
+                if friend_fio in inviter:
+                    bot.send_message(message.chat.id, 'Ваш друг уже приглаcил на мероприятие', reply_markup=keyboard)
+                    return
+
+            buy_bilet_plus(message)
+        else:
+            bot.send_message(message.chat.id, 'Нет такого друга в списке. Если ты считаешь, что это ошибка, то обратись в личные сообщения к [Асе](https://t.me/asyafomichewa)', reply_markup=keyboard, parse_mode="Markdown")
+
+def yes_data_unswer2(message):
+    keyboard = types.InlineKeyboardMarkup()
+    btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
+    keyboard.add(btn_menu)
+    bot.send_message(message.from_user.id,
+                         text="Обратись в личные сообщения к [Асе](https://t.me/asyafomichewa), с пометкой о том, что твое ФИО отсутствует в списках.", reply_markup=keyboard)
+
+def no_data_unswer2(message):
+    c = bot.send_message(message.from_user.id,
+                         text="Тогда введи свое ФИО заново!", parse_mode="Markdown")
+    bot.register_next_step_handler(c, buy_bilet_data)
+
+def kostel_for_data(message):
+    keyboard = types.InlineKeyboardMarkup()
+    btn_yes_data = types.InlineKeyboardButton(text='Да', callback_data='yes_data',one_time_keyboard=True)
+    keyboard.add(btn_yes_data)
+    btn_no_data = types.InlineKeyboardButton(text='Нет', callback_data='no_data',one_time_keyboard=True)
+    keyboard.add(btn_no_data)
+    bot.send_message(message.from_user.id, text="Извини, твоих данных нет в списке четверокурсников. Ты верно записал/а свои данные (ФИО с большой буквы и как в паспорте)?", reply_markup=keyboard)
+
 
 def proverka_grade(message):
     keyboard = types.InlineKeyboardMarkup()
+    btn_yes_grade = types.InlineKeyboardButton(text='Да', callback_data='yes_grade',one_time_keyboard=True)
+    keyboard.add(btn_yes_grade)
+    btn_no_grade = types.InlineKeyboardButton(text='Нет', callback_data='no_grade',one_time_keyboard=True)
+    keyboard.add(btn_no_grade)
     btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da1')
     keyboard.add(btn_menu)
     bot.send_message(message.from_user.id,
-                         text="К сожалению, первая партия билетов на After Grade Party’24 закончилась\n\nНе переживай, уже скоро у тебя снова будет возможность приобрести билет. Следи за нашими обновлениями!", reply_markup=keyboard)
+                         text="Перед покупкой билета мы хотим оповестить тебя о некоторых правилах нашего мероприятия:\n\n- After Grade Party’24 в первую очередь предназначена для выпускников, и пока продажа билетов идет только для них.\n\n- Выпускники смогут взять с собой друзей, но информация об этом будет позже в нашей группе.\n\nЕсли согласен с правилами, нажми “Да” ниже.", reply_markup=keyboard)
+
+#def proverka_grade(message):
+    #keyboard = types.InlineKeyboardMarkup()
+    #btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da1')
+    #keyboard.add(btn_menu)
+    #bot.send_message(message.from_user.id,
+                         #text="К сожалению, первая партия билетов на After Grade Party’24 закончилась\n\nНе переживай, уже скоро у тебя снова будет возможность приобрести билет. Следи за нашими обновлениями!", reply_markup=keyboard)
+
+def buy_bilet_plus(message):
+    a = bot.send_message(message.from_user.id, text=text_oplata, parse_mode="Markdown")
+    bot.register_next_step_handler(a, buy_bilet_group_proverka2)
 
 def buy_bilet(message):
     a = bot.send_message(message.from_user.id, text=text_oplata, parse_mode="Markdown")
     bot.register_next_step_handler(a, buy_bilet_data)
+
+
+
+
+
+
 
 def no_grade_unswer(message):
     keyboard = types.InlineKeyboardMarkup()
@@ -595,19 +782,19 @@ def check_oplata(message):
     btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_oplata')
     keyboard.add(btn_menu)
 
-    with open('/home/romanloqi/code/guests_valid_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romchikhamrin/telebot/guests_valid_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         words = json.loads(file_read)
 
     if message.from_user.username in words:
         words[message.from_user.username] += 1
-        with open('/home/romanloqi/code/guests_valid_grade.json', 'w', encoding='UTF-8') as f:
+        with open('/home/romchikhamrin/telebot/guests_valid_grade.json', 'w', encoding='UTF-8') as f:
             json.dump(words, f)
         bot.send_message(message.from_user.id,
-                         text="Пока что твоя оплата не подтверждена, проверь подтверждение через некоторое время после окончания предпродажи.", reply_markup=keyboard)
+                         text="Твоя оплата подтверждена, до встречи на After Grade Party’24", reply_markup=keyboard)
     else:
         bot.send_message(message.from_user.id,
-                        text = "Пока что твоя оплата не подтверждена, проверь подтверждение через некоторое время после окончания предпродажи.", reply_markup=keyboard)
+                        text = "Если ты купил/а билет в первую волну продаж, напиши [Асе](https://t.me/asyafomichewa), с пометкой о том, что твоя оплата не подтверждена.\n\nЕсли ты купил/а билет во вторую волну, то подтверждение оплаты сможешь проверить позже", reply_markup=keyboard)
 
 
 def get_info(message):
@@ -623,24 +810,24 @@ def get_info(message):
 @bot.message_handler(commands=[ 'start' ])
 def start(message):
     if isinstance(message, telebot.types.Message):
-        with open('/home/romanloqi/code/guest_page.json', 'r') as f:
+        with open('/home/romchikhamrin/telebot/guest_page.json', 'r') as f:
             user_stat = json.load(f)
             user_stat[str(message.chat.id)] = {"page_bar": 1, "page_rules": 1}
-            with open ('/home/romanloqi/code/guest_page.json', 'w') as of:
+            with open ('/home/romchikhamrin/telebot/guest_page.json', 'w') as of:
                 json.dump(user_stat, of)
     tz0 = pytz.timezone('Europe/Moscow')
     current_datetime0 = datetime.now(tz0).isoformat(sep='T', timespec='seconds')
-    with open('/home/romanloqi/code/guests_start_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romchikhamrin/telebot/guests_start_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
         else:
             words = dict()
     words[message.from_user.username] = [message.from_user.id, current_datetime0]
-    with open('/home/romanloqi/code/guests_start_grade.json', 'w', encoding='UTF-8') as f:
+    with open('/home/romchikhamrin/telebot/guests_start_grade.json', 'w', encoding='UTF-8') as f:
         json.dump(words, f)
         print(words[message.from_user.username])
-    with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
