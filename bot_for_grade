@@ -3,20 +3,20 @@ from telebot import types
 import json
 from datetime import datetime
 import pytz
-API_TOKEN = '7337352069:AAEldMs_t8rPdIHHXV_b51UDQSAYoEJgqts'
+API_TOKEN = '6884050669:AAHC6ySz-utJp1DGaIrfoNz8L4csA19v3Ec'
 bot = telebot.TeleBot(API_TOKEN)
 
 # Загружаем списки тегов и ФИО из файлов
-with open('/home/romchikhamrin/telebot/tags.txt', 'r', encoding="UTF-8") as file:
+with open('/home/romanloqi/code/tags.txt', 'r', encoding="UTF-8") as file:
     username_list = file.read()
 
-with open("/home/romchikhamrin/telebot/ФИО 4 курс.txt", 'r', encoding="UTF-8") as file:
+with open("/home/romanloqi/code/ФИО 4 курс.txt", 'r', encoding="UTF-8") as file:
     names_list = file.read()
 
-with open("/home/romchikhamrin/telebot/users.json", 'r', encoding='utf-8') as f:
+with open("/home/romanloqi/code/users.json", 'r', encoding='utf-8') as f:
     users_dict = json.load(f)
 
-with open("/home/romchikhamrin/telebot/friend_kostel.json", 'r', encoding='utf-8') as f:
+with open("/home/romanloqi/code/friend_kostel.json", 'r', encoding='utf-8') as f:
     friends_dict = json.load(f)
 
 data={}
@@ -24,8 +24,7 @@ university={}
 vip_client=False
 for_who = ""
 for_where = ""
-friend_fio = {}
-
+friend_fio = dict()
 
 text_oplata = "Ты можешь приобрести билет на After Grade Party’24 по фикированой цене.\n\nЦена: *4000р*.\n\nВАЖНО: При покупке билета обязательно укажи *ФИО* в сообщении к переводу.\n\nТИНЬКОФФ:\n'''5536914028739823'''\n\nСБЕР:\n'''4279380695720963'''\n\nВТБ:\n'''2200246091065709'''\n\nПо номеру телефона:\n'''+7 (929) 657-46-27'''\nЕкатерина Александровка К.\n\n*ПОСЛЕ СОВЕРШЕНИЯ ОПЛАТЫ*\n\nПожалуйста, напиши свое *ФИО*\n\n_Пример: Иванов Иван Иваныч_\n\n_Если ты начал/а процесс регистрации, пожалуйста, пройди его до конца. Если после введения ФИО бот не дает  ответа - нажми заново /start_"
 rules_dict = ['/Users/formalraindbow43/Downloads/Telegram Desktop/правила_1 (1).png', '/Users/formalraindbow43/Downloads/Telegram Desktop/правила_2 (1).png']
@@ -141,19 +140,9 @@ def callback_query(call):
     elif call.data == "buy_as_fourth_year":
         buy_bilet(call)
     elif call.data == "buy_as_plus_one":
-        keyboard = types.InlineKeyboardMarkup()
-        btn_yes_data = types.InlineKeyboardButton(text='Да', callback_data='yes_+1', one_time_keyboard=True)
-        btn_no_data = types.InlineKeyboardButton(text='Нет', callback_data='no_+1', one_time_keyboard=True)
-        keyboard.add(btn_yes_data, btn_no_data)
-        bot.send_message(call.message.chat.id, text="Твоих данных нет в списке четверокурсников. Ты собираешься купить билет +1?", reply_markup=keyboard)
+        kostyl_buy_bilet_plus(call)
     elif call.data == "yes_+1":
-        bot.send_message(call.message.chat.id, text="Напиши ФИО четверокурсника, который тебя позвал")
-        bot.register_next_step_handler(call.message, ask_friend_fio)
-    elif call.data == 'no_+1':
-        keyboard = types.InlineKeyboardMarkup()
-        btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
-        bot.send_message(call.message,
-                         text='Хочешь вернуться в главное меню?', reply_markup=keyboard)
+        kostyl_yes_plus(call)
     elif call.data == "no_grade":
         bot.edit_message_text(chat_id=call.message.chat.id,  message_id=call.message.message_id, text="Обрабатываем запрос...")
         no_grade_unswer(call)
@@ -262,9 +251,15 @@ def menu_pravila(chat_id_2, user_stat):
                    reply_markup=pagination)
 
 
+def kostyl_buy_bilet_plus(message):
+    keyboard = types.InlineKeyboardMarkup()
+    btn_yes_data = types.InlineKeyboardButton(text='Да', callback_data='yes_+1', one_time_keyboard=True)
+    keyboard.add(btn_yes_data)
+    bot.send_message(message.from_user.id, text="Твоих данных нет в списке четверокурсников. Ты собираешься купить билет +1?", reply_markup=keyboard)
 
-
-
+def kostyl_yes_plus(message):
+    d = bot.send_message(message.from_user.id, text='Укажи *имя пользователя* друга, который тебя пригласил в *телеграмм*! Сделать это можно нажав на его профиль -> имя пользователя', parse_mode="Markdown")
+    bot.register_next_step_handler(d, ask_friend_fio)
 def menu_osninfo(message):
     keyboard = types.InlineKeyboardMarkup()
     btn_menu_osninfo = types.InlineKeyboardButton(text='Основная инфа', callback_data='menu_osninfo')
@@ -278,7 +273,7 @@ def menu_osninfo(message):
                      reply_markup=keyboard, parse_mode="Markdown")
 
 def razvodka_change_facultet(message):
-    with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
@@ -288,7 +283,7 @@ def razvodka_change_facultet(message):
         global data, kostyl,university,for_who, from_where
         try:
             data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
-            with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+            with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
                 file_read = f.read()
                 if file_read != '':
                     words = json.loads(file_read)
@@ -296,7 +291,7 @@ def razvodka_change_facultet(message):
                     words = dict()
                 old_datetime = words[message.from_user.username][7]
                 words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], university[message.from_user.id], for_where, for_who, old_datetime]
-            with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
+            with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
                 json.dump(words, f)
                 print(words[message.from_user.username])
         except KeyError:
@@ -312,7 +307,7 @@ def razvodka_change_facultet(message):
         buy_bilet_from_who(message)
 
 def razvodka_change_from_who(message):
-    with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
@@ -322,7 +317,7 @@ def razvodka_change_from_who(message):
         global data, kostyl,university,for_who, from_where
         try:
             data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
-            with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+            with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
                 file_read = f.read()
                 if file_read != '':
                     words = json.loads(file_read)
@@ -330,7 +325,7 @@ def razvodka_change_from_who(message):
                     words = dict()
                 old_datetime = words[message.from_user.username][7]
                 words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], university[message.from_user.id], for_where, for_who, old_datetime]
-            with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
+            with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
                 json.dump(words, f)
                 print(words[message.from_user.username])
         except KeyError:
@@ -365,7 +360,7 @@ def priem_data(message):
         data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
         tz=pytz.timezone('Europe/Moscow')
         current_datetime = datetime.now(tz).isoformat(sep='T', timespec='seconds')
-        with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+        with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
             file_read = f.read()
             if file_read != '':
                 words = json.loads(file_read)
@@ -377,7 +372,7 @@ def priem_data(message):
         elif (message.from_user.username not in words):
             words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], current_datetime]
     #words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], group[message.from_user.id]]
-        with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
+        with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
             json.dump(words, f)
             print(words[message.from_user.username])
     except KeyError:
@@ -395,7 +390,7 @@ def priem_data2(message):
         data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
         tz=pytz.timezone('Europe/Moscow')
         current_datetime = datetime.now(tz).isoformat(sep='T', timespec='seconds')
-        with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+        with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
             file_read = f.read()
             if file_read != '':
                 words = json.loads(file_read)
@@ -407,7 +402,7 @@ def priem_data2(message):
         elif (message.from_user.username not in words):
             words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], current_datetime, friend_fio]
     #words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], group[message.from_user.id]]
-        with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
+        with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
             json.dump(words, f)
             print(words[message.from_user.username])
     except KeyError:
@@ -465,7 +460,7 @@ def change_fio(message): #Проверка на тип данных str
                 for i in range(3-len(message.text.split())):
                     data[message.from_user.id]+=" -"
             data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
-            with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+            with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
                 file_read = f.read()
                 if file_read != '':
                     words = json.loads(file_read)
@@ -473,7 +468,7 @@ def change_fio(message): #Проверка на тип данных str
                     words = dict()
                 old_datetime = words[message.from_user.username][4]
                 words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], old_datetime, friend_fio]
-            with open('/home/romchikhamrin/telebot/guests_grade.json', 'w', encoding='UTF-8') as f:
+            with open('/home/romanloqi/code/guests_grade.json', 'w', encoding='UTF-8') as f:
                 json.dump(words, f)
                 print(words[message.from_user.username])
 
@@ -665,7 +660,7 @@ def yes_data_unswer(message):
     btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
     keyboard.add(btn_menu)
     a = bot.send_message(message.from_user.id,
-                         text="Укажи *имя пользователя* друга, который тебя пригласил в *телеграмм*! Сделать это можно нажав на его профиль -> имя пользователя")
+                         text="Укажи *имя пользователя* друга, который тебя пригласил в *телеграмм*! Сделать это можно нажав на его профиль -> имя пользователя", parse_mode="Markdown")
     bot.register_next_step_handler(a, ask_friend_fio)
 
 def buy_bilet_data_plus(message):
@@ -674,7 +669,7 @@ def buy_bilet_data_plus(message):
         data_list = str(data[message.from_user.id]).split() + ['-', '-', '-']
         tz=pytz.timezone('Europe/Moscow')
         current_datetime = datetime.now(tz).isoformat(sep='T', timespec='seconds')
-        with open('/home/romchikhamrin/telebot/users.json', 'r', encoding='UTF-8') as f:
+        with open('/home/romanloqi/code/users.json', 'r', encoding='UTF-8') as f:
             file_read = f.read()
             if file_read != '':
                 words = json.loads(file_read)
@@ -686,7 +681,7 @@ def buy_bilet_data_plus(message):
         elif message.from_user.username not in words:
             words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], current_datetime]
     #words[message.from_user.username] = [message.from_user.id, data_list[0], data_list[1], data_list[2], group[message.from_user.id]]
-        with open('/home/romchikhamrin/telebot/users.json', 'w', encoding='UTF-8') as f:
+        with open('/home/romanloqi/code/users.json', 'w', encoding='UTF-8') as f:
             json.dump(words, f)
             print(words[message.from_user.username])
     except KeyError:
@@ -700,22 +695,24 @@ def buy_bilet_data_plus(message):
 
 
 def ask_friend_fio(message):
-    global friend_fio
-    friend_fio[message.from_user.id] = message.text
+    global friend_fio, data
+    friend_fio = message.text
     keyboard = types.InlineKeyboardMarkup()
     btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
     keyboard.add(btn_menu)
-    for friend_fio in friends_dict:
-        if friend_fio in friends_dict:
-            for inviter, invitee in users_dict.items():
-                if friend_fio in inviter:
-                    bot.send_message(message.chat.id, 'Ваш друг уже приглаcил на мероприятие', reply_markup=keyboard)
-                    return
 
-            buy_bilet_plus(message)
-        else:
-            bot.send_message(message.chat.id, 'Нет такого друга в списке. Если ты считаешь, что это ошибка, то обратись в личные сообщения к [Асе](https://t.me/asyafomichewa)', reply_markup=keyboard, parse_mode="Markdown")
-
+    if friend_fio in friends_dict.keys():
+        for inviter, invitee in users_dict.items():
+            if friend_fio in inviter:
+                bot.send_message(message.chat.id, 'Ваш друг уже приглаcил на мероприятие', reply_markup=keyboard)
+                return
+            else:
+                return
+        buy_bilet_plus(message)
+        return
+    else:
+        bot.send_message(message.chat.id, 'Нет такого друга в списке. Если ты считаешь, что это ошибка, то обратись в личные сообщения к [Асе](https://t.me/asyafomichewa)', reply_markup=keyboard, parse_mode="Markdown")
+        return
 def yes_data_unswer2(message):
     keyboard = types.InlineKeyboardMarkup()
     btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da')
@@ -746,7 +743,7 @@ def proverka_grade(message):
     btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_da1')
     keyboard.add(btn_menu)
     bot.send_message(message.from_user.id,
-                         text="Перед покупкой билета мы хотим оповестить тебя о некоторых правилах нашего мероприятия:\n\n- After Grade Party’24 в первую очередь предназначена для выпускников, и пока продажа билетов идет только для них.\n\n- Выпускники смогут взять с собой друзей, но информация об этом будет позже в нашей группе.\n\nЕсли согласен с правилами, нажми “Да” ниже.", reply_markup=keyboard)
+                         text="Перед покупкой билета мы хотим оповестить тебя о некоторых правилах нашего мероприятия:\n\nAfter Grade Party'24 в первую очередь предназначена для выпускников, но каждый выпускник может взять с собой одного друга. Для этого другу необходимо самостоятельно приобрести отдельный билет, указав ФИО пригласившего.\n\nЕсли согласен с правилами, нажми “Да” ниже.", reply_markup=keyboard)
 
 #def proverka_grade(message):
     #keyboard = types.InlineKeyboardMarkup()
@@ -756,6 +753,8 @@ def proverka_grade(message):
                          #text="К сожалению, первая партия билетов на After Grade Party’24 закончилась\n\nНе переживай, уже скоро у тебя снова будет возможность приобрести билет. Следи за нашими обновлениями!", reply_markup=keyboard)
 
 def buy_bilet_plus(message):
+    global friend_fio
+    print(friend_fio)
     a = bot.send_message(message.from_user.id, text=text_oplata, parse_mode="Markdown")
     bot.register_next_step_handler(a, buy_bilet_group_proverka2)
 
@@ -782,13 +781,13 @@ def check_oplata(message):
     btn_menu = types.InlineKeyboardButton(text='Вернуться в главное меню', callback_data='menu_oplata')
     keyboard.add(btn_menu)
 
-    with open('/home/romchikhamrin/telebot/guests_valid_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romanloqi/code/guests_valid_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         words = json.loads(file_read)
 
     if message.from_user.username in words:
         words[message.from_user.username] += 1
-        with open('/home/romchikhamrin/telebot/guests_valid_grade.json', 'w', encoding='UTF-8') as f:
+        with open('/home/romanloqi/code/guests_valid_grade.json', 'w', encoding='UTF-8') as f:
             json.dump(words, f)
         bot.send_message(message.from_user.id,
                          text="Твоя оплата подтверждена, до встречи на After Grade Party’24", reply_markup=keyboard)
@@ -810,24 +809,24 @@ def get_info(message):
 @bot.message_handler(commands=[ 'start' ])
 def start(message):
     if isinstance(message, telebot.types.Message):
-        with open('/home/romchikhamrin/telebot/guest_page.json', 'r') as f:
+        with open('/home/romanloqi/code/guest_page.json', 'r') as f:
             user_stat = json.load(f)
             user_stat[str(message.chat.id)] = {"page_bar": 1, "page_rules": 1}
-            with open ('/home/romchikhamrin/telebot/guest_page.json', 'w') as of:
+            with open ('/home/romanloqi/code/guest_page.json', 'w') as of:
                 json.dump(user_stat, of)
     tz0 = pytz.timezone('Europe/Moscow')
     current_datetime0 = datetime.now(tz0).isoformat(sep='T', timespec='seconds')
-    with open('/home/romchikhamrin/telebot/guests_start_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romanloqi/code/guests_start_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
         else:
             words = dict()
     words[message.from_user.username] = [message.from_user.id, current_datetime0]
-    with open('/home/romchikhamrin/telebot/guests_start_grade.json', 'w', encoding='UTF-8') as f:
+    with open('/home/romanloqi/code/guests_start_grade.json', 'w', encoding='UTF-8') as f:
         json.dump(words, f)
         print(words[message.from_user.username])
-    with open('/home/romchikhamrin/telebot/guests_grade.json', 'r', encoding='UTF-8') as f:
+    with open('/home/romanloqi/code/guests_grade.json', 'r', encoding='UTF-8') as f:
         file_read = f.read()
         if file_read != '':
             words = json.loads(file_read)
